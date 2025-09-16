@@ -1,36 +1,114 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Nirmal E-commerce Project
+1. How to Run the Project
+Prerequisites
 
-## Getting Started
+Node.js >= 18.x
 
-First, run the development server:
+npm >= 9.x (or yarn)
 
-```bash
+Internet connection for API fetches
+
+Steps
+
+Clone the repository:
+
+git clone <repo-url>
+cd nirmal
+
+
+Install dependencies:
+
+npm install
+
+
+Run the development server:
+
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Open the app in your browser:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+http://localhost:3000
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+Build for production:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+npm run build
+npm start
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. Architecture Notes
+Pages
 
-## Deploy on Vercel
+Home Page (/)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Displays all products.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Includes Search, Filter, and Sort functionality.
+
+Pagination implemented for large product lists.
+
+Product Detail Page (/product/[id])
+
+Server component fetches product details.
+
+Related products section is a client component for interactivity (filter/search/pagination).
+
+Components
+
+Client Components (interactive, use hooks)
+
+FilterPanel → handles category & price filter.
+
+SearchInput → search by title.
+
+SortSelect → sort by price.
+
+RelatedProductsClient → shows related products with pagination/filtering.
+
+Server Components (data fetching, static render)
+
+ProductDetail page → fetches product by ID.
+
+API fetch functions (getProduct, getRelatedProducts) live here.
+
+State & Data Flow
+
+State is lifted from interactive components to their parent (HomeClient or RelatedProductsClient) for synchronized filtering and pagination.
+
+Server fetch functions provide initial product data (initialProducts).
+
+Pagination, filtering, and sorting are handled entirely on the client side.
+
+3. Trade-offs / Known Issues
+
+Trade-offs
+
+Related products section uses client-side filtering to allow instant updates, at the cost of initial bundle size.
+
+Product detail page fetches products on the server for SEO and performance but interactive filtering is client-side.
+
+Known Issues
+
+Server component cannot handle client-side state, so any useState in ProductDetail will throw errors.
+
+Pagination and filtering on RelatedProductsClient may reset when parent re-renders.
+
+API is mocked via dummyjson.com → real production API may require authentication or different endpoints.
+
+4. Optional Demo
+
+A short Loom or GIF can show:
+
+Filtering products by category/price.
+
+Searching products.
+
+Pagination with Previous/Next buttons.
+
+Clicking a product and viewing related products.
+
+## Demo
+
+[![Watch the demo](## Demo
+
+[![Watch the demo](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)])]
