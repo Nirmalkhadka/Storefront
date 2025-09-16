@@ -1,10 +1,8 @@
 import { Product } from "@/lib/types";
 import Image from "next/image";
-import ProductCard from "@/components/ProductCard";
 import { notFound } from "next/navigation";
-import { Metadata } from "next";
-import AddToCartButton from "@/components/AddToCartButton";
-import RelatedProductsSection from "@/components/RelatedProductsSection";
+import RelatedProductsSectionClient from "@/components/RelatedProductsSection";
+import AddToCartButtonClient from "@/components/AddToCartButton";
 
 // API response type
 interface ApiProduct {
@@ -19,7 +17,7 @@ interface ApiProduct {
   stock: number;
 }
 
-// fetch single product
+// Fetch single product
 async function getProduct(id: string): Promise<Product | null> {
   try {
     const res = await fetch(`https://dummyjson.com/products/${id}`, { cache: "no-store" });
@@ -40,7 +38,7 @@ async function getProduct(id: string): Promise<Product | null> {
   }
 }
 
-// fetch related products
+// Fetch related products
 async function getRelatedProducts(category: string, currentId: number): Promise<Product[]> {
   try {
     const res = await fetch(`https://dummyjson.com/products/category/${category}?limit=20`);
@@ -64,15 +62,12 @@ async function getRelatedProducts(category: string, currentId: number): Promise<
   }
 }
 
-// Metadata
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const product = await getProduct(params.id);
-  if (!product) return { title: "Product Not Found" };
-  return { title: product.title, description: product.description };
+// ✅ Server component page
+interface PageProps {
+  params: { id: string };
 }
 
-// ✅ Server component page
-export default async function ProductDetail({ params }: { params: { id: string } }) {
+export default async function ProductDetail({ params }: PageProps) {
   const product = await getProduct(params.id);
   if (!product) notFound();
 
@@ -82,6 +77,7 @@ export default async function ProductDetail({ params }: { params: { id: string }
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 min-h-screen">
       <section className="max-w-6xl mx-auto animate-slideIn">
         <div className="flex flex-col md:flex-row gap-8">
+          {/* Product Image */}
           <div className="md:w-1/2">
             <Image
               src={product.image}
@@ -92,17 +88,22 @@ export default async function ProductDetail({ params }: { params: { id: string }
               priority
             />
           </div>
-          <div style={{padding:'12px'}}
-           className="md:w-full h-fit sticky top-6 bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+
+          {/* Product Details */}
+          <div className="md:w-full h-fit sticky top-6 bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
             <h1 className="text-4xl font-extrabold mb-3">{product.title}</h1>
             <p className="text-2xl font-bold text-indigo-600 mb-4">${product.price.toFixed(2)}</p>
             <p className="text-sm uppercase tracking-wide text-gray-500 mb-4">{product.category}</p>
             <p className="text-gray-700 mb-6">{product.description}</p>
-            <AddToCartButton product={product} />
+            {/* Client Component for interactivity */}
+            <AddToCartButtonClient product={product} />
           </div>
         </div>
 
-        {relatedProducts.length > 0 && <RelatedProductsSection products={relatedProducts} />}
+        {/* Related Products */}
+        {relatedProducts.length > 0 && (
+          <RelatedProductsSectionClient products={relatedProducts} />
+        )}
       </section>
     </div>
   );
