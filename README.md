@@ -105,4 +105,4 @@ Pagination with Previous/Next buttons
 Clicking a product to view related products
 
 Demo Video / GIF
-[![Watch the demo](https://youtu.be/5sercvTYOcg)]
+[![Watch the demo] https://youtu.be/5sercvTYOcg]
