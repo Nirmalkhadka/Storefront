@@ -12,13 +12,19 @@ interface Props {
 
 export default function RelatedProductsSection({ products }: Props) {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
+  const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(true);
+
+  const productsPerPage = 4;
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * productsPerPage,
+    currentPage * productsPerPage
+  );
 
   return (
     <section className="mt-12">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
-        Related Products
-      </h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Related Products</h2>
 
       <div className="flex flex-col lg:flex-row gap-8">
         {showFilters && (
@@ -39,13 +45,36 @@ export default function RelatedProductsSection({ products }: Props) {
             </button>
           </div>
 
-          {filteredProducts.length === 0 ? (
+          {paginatedProducts.length === 0 ? (
             <p className="text-gray-600 dark:text-gray-300">No related products found.</p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {filteredProducts.map((product) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6">
+              {paginatedProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-4 flex justify-center items-center gap-4">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-lg disabled:opacity-50"
+              >
+                Prev
+              </button>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-lg disabled:opacity-50"
+              >
+                Next
+              </button>
             </div>
           )}
         </div>
