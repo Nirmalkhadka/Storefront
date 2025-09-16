@@ -1,11 +1,12 @@
+// src/app/product/[id]/page.tsx
 import { Product } from "@/lib/types";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import RelatedProductsSectionClient from "@/components/RelatedProductsSection";
-import AddToCartButtonClient from "@/components/AddToCartButton";
 import { Metadata } from "next";
+import AddToCartButtonClient from "@/components/AddToCartButton";
+import RelatedProductsSectionClient from "@/components/RelatedProductsSection";
 
-// API response type
+// API type
 interface ApiProduct {
   id: number;
   title: string;
@@ -18,7 +19,7 @@ interface ApiProduct {
   stock: number;
 }
 
-// Fetch single product
+// fetch single product
 async function getProduct(id: string): Promise<Product | null> {
   try {
     const res = await fetch(`https://dummyjson.com/products/${id}`, { cache: "no-store" });
@@ -39,7 +40,7 @@ async function getProduct(id: string): Promise<Product | null> {
   }
 }
 
-// Fetch related products
+// fetch related products
 async function getRelatedProducts(category: string, currentId: number): Promise<Product[]> {
   try {
     const res = await fetch(`https://dummyjson.com/products/category/${category}?limit=20`);
@@ -63,7 +64,7 @@ async function getRelatedProducts(category: string, currentId: number): Promise<
   }
 }
 
-// ✅ Metadata
+// Metadata
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const product = await getProduct(params.id);
   if (!product) return { title: "Product Not Found" };
@@ -71,11 +72,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
 }
 
 // ✅ Server Component Page
-interface Props {
-  params: { id: string }; // just plain object, NOT Promise
-}
-
-export default async function ProductDetail({ params }: Props) {
+export default async function ProductDetail({ params }: { params: { id: string } }) {
   const product = await getProduct(params.id);
   if (!product) notFound();
 
@@ -83,30 +80,30 @@ export default async function ProductDetail({ params }: Props) {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 min-h-screen">
-      <section className="max-w-6xl mx-auto animate-slideIn">
-        <div className="flex flex-col md:flex-row gap-8">
-          <div className="md:w-1/2">
-            <Image
-              src={product.image}
-              alt={product.title}
-              width={400}
-              height={400}
-              className="rounded-lg shadow-lg object-cover"
-              priority
-            />
-          </div>
-
-          <div className="md:w-full h-fit sticky top-6 bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
-            <h1 className="text-4xl font-extrabold mb-3">{product.title}</h1>
-            <p className="text-2xl font-bold text-indigo-600 mb-4">${product.price.toFixed(2)}</p>
-            <p className="text-sm uppercase tracking-wide text-gray-500 mb-4">{product.category}</p>
-            <p className="text-gray-700 mb-6">{product.description}</p>
-            <AddToCartButtonClient product={product} />
-          </div>
+      <div className="flex flex-col md:flex-row gap-8">
+        <div className="md:w-1/2">
+          <Image
+            src={product.image}
+            alt={product.title}
+            width={400}
+            height={400}
+            className="rounded-lg shadow-lg object-cover"
+            priority
+          />
         </div>
 
-        {relatedProducts.length > 0 && <RelatedProductsSectionClient products={relatedProducts} />}
-      </section>
+        <div className="md:w-full h-fit sticky top-6 bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+          <h1 className="text-4xl font-extrabold mb-3">{product.title}</h1>
+          <p className="text-2xl font-bold text-indigo-600 mb-4">${product.price.toFixed(2)}</p>
+          <p className="text-sm uppercase tracking-wide text-gray-500 mb-4">{product.category}</p>
+          <p className="text-gray-700 mb-6">{product.description}</p>
+          <AddToCartButtonClient product={product} />
+        </div>
+      </div>
+
+      {relatedProducts.length > 0 && (
+        <RelatedProductsSectionClient products={relatedProducts} />
+      )}
     </div>
   );
 }
