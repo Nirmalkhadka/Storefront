@@ -1,103 +1,112 @@
-"use client";
-import { useCartStore } from "@/store/cartStore";
+import { Product } from "@/lib/types";
 import Image from "next/image";
-import Link from "next/link";
-import { toast } from "react-hot-toast";
+import { notFound } from "next/navigation";
+import RelatedProductsSectionClient from "@/components/RelatedProductsSection";
+import AddToCartButtonClient from "@/components/AddToCartButton";
+import { Metadata } from "next";
 
-export default function Cart() {
-  const { items, clearCart } = useCartStore();
+// API response type
+interface ApiProduct {
+  id: number;
+  title: string;
+  price: number;
+  category: string;
+  description?: string;
+  thumbnail?: string;
+  images?: string[];
+  rating: number;
+  stock: number;
+}
 
-  const total = items
-    .reduce((sum, item) => sum + item.price * item.quantity, 0)
-    .toFixed(2);
+// Fetch single product
+async function getProduct(id: string): Promise<Product | null> {
+  try {
+    const res = await fetch(`https://dummyjson.com/products/${id}`, { cache: "no-store" });
+    if (!res.ok) return null;
+    const data: ApiProduct = await res.json();
+    return {
+      id: data.id,
+      title: data.title,
+      price: data.price,
+      category: data.category,
+      description: data.description || "No description available",
+      image: data.thumbnail || data.images?.[0] || "/placeholder.jpg",
+      rating: { rate: data.rating, count: data.stock },
+      stock: data.stock,
+    };
+  } catch {
+    return null;
+  }
+}
+
+// Fetch related products
+async function getRelatedProducts(category: string, currentId: number): Promise<Product[]> {
+  try {
+    const res = await fetch(`https://dummyjson.com/products/category/${category}?limit=20`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (!data.products || !Array.isArray(data.products)) return [];
+    return (data.products as ApiProduct[])
+      .filter((p) => p.id !== currentId)
+      .map((p) => ({
+        id: p.id,
+        title: p.title,
+        price: p.price,
+        category: p.category,
+        description: p.description || "No description available",
+        image: p.thumbnail?.trim() || p.images?.[0]?.trim() || "/placeholder.jpg",
+        rating: { rate: p.rating, count: p.stock },
+        stock: p.stock,
+      }));
+  } catch {
+    return [];
+  }
+}
+
+// ✅ Metadata
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const product = await getProduct(params.id);
+  if (!product) return { title: "Product Not Found" };
+  return { title: product.title, description: product.description };
+}
+
+// ✅ Server Component Page
+interface Props {
+  params: { id: string }; // just plain object, NOT Promise
+}
+
+export default async function ProductDetail({ params }: Props) {
+  const product = await getProduct(params.id);
+  if (!product) notFound();
+
+  const relatedProducts = await getRelatedProducts(product.category, product.id);
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 lg:p-8 bg-white dark:bg-gray-900 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white animate-slideIn">
-        Shopping Cart
-      </h1>
-      {items.length === 0 ? (
-        <section
-          aria-live="polite"
-          className="text-center text-gray-500 dark:text-gray-400 animate-fadeIn"
-        >
-          <p className="text-xl">Your cart is empty.</p>
-          <Link
-            href="/"
-            className="text-blue-500 hover:underline mt-2 inline-block"
-          >
-            Continue shopping
-          </Link>
-        </section>
-      ) : (
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="lg:w-2/3">
-            <div className="space-y-4">
-              {items.map((item) => (
-                <article
-                  key={item.id}
-                  className="flex items-center justify-between p-5 bg-white dark:bg-gray-800
-             rounded-xl shadow-md border border-gray-200 dark:border-gray-700
-             hover:shadow-lg transition-all duration-200"
-                >
-                  <div className="flex items-center gap-4">
-                    <Image
-                      src={item.image}
-                      alt={item.title}
-                      width={90}
-                      height={90}
-                      className="rounded-lg object-cover shadow-sm"
-                    />
-                    <div>
-                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {item.title}
-                      </h2>
-                      <p className="text-gray-600 dark:text-gray-300">
-                        ${item.price.toFixed(2)}
-                      </p>
-                      {/* qty controls */}
-                    </div>
-                  </div>
-                  <p className="font-bold text-indigo-600 dark:text-indigo-400">
-                    ${(item.price * item.quantity).toFixed(2)}
-                  </p>
-                </article>
-              ))}
-            </div>
-            <button
-              onClick={() => {
-                clearCart();
-                toast.success("Cart cleared");
-              }}
-              className="mt-6 px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all duration-200 transform hover:scale-105"
-              aria-label="Clear entire cart"
-            >
-              Clear Cart
-            </button>
+    <div className="container mx-auto p-4 sm:p-6 lg:p-8 min-h-screen">
+      <section className="max-w-6xl mx-auto animate-slideIn">
+        <div className="flex flex-col md:flex-row gap-8">
+          <div className="md:w-1/2">
+            <Image
+              src={product.image}
+              alt={product.title}
+              width={400}
+              height={400}
+              className="rounded-lg shadow-lg object-cover"
+              priority
+            />
           </div>
-          <div className="lg:w-1/3 sticky top-6 animate-slideUp">
-            <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">
-                Order Summary
-              </h2>
-              <div className="mb-4">
-                <p className="text-gray-700 dark:text-gray-300">
-                  Total Items: {items.length}
-                </p>
-                <p className="text-2xl font-bold text-gray-800 dark:text-white mt-2">
-                  Total: ${total}
-                </p>
-              </div>
-              <button
-                className="w-full bg-gradient-to-r from-green-500 to-teal-600 text-white px-6 py-3 rounded-lg shadow-md hover:from-green-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105"
-                aria-label="Proceed to checkout"
-              >
-                Proceed to Checkout
-              </button>
-            </div>
+
+          <div className="md:w-full h-fit sticky top-6 bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+            <h1 className="text-4xl font-extrabold mb-3">{product.title}</h1>
+            <p className="text-2xl font-bold text-indigo-600 mb-4">${product.price.toFixed(2)}</p>
+            <p className="text-sm uppercase tracking-wide text-gray-500 mb-4">{product.category}</p>
+            <p className="text-gray-700 mb-6">{product.description}</p>
+            <AddToCartButtonClient product={product} />
           </div>
         </div>
-      )}
+
+        {relatedProducts.length > 0 && <RelatedProductsSectionClient products={relatedProducts} />}
+      </section>
     </div>
   );
 }
