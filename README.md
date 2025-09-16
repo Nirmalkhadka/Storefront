@@ -26,10 +26,7 @@ Run the development server:
 npm run dev
 
 
-Open the app in your browser:
-
-http://localhost:3000
-
+Open the app in your browser: http://localhost:3000
 
 Build for production:
 
@@ -41,74 +38,71 @@ Pages
 
 Home Page (/)
 
-Displays all products.
+Displays all products
 
-Includes Search, Filter, and Sort functionality.
+Includes Search, Filter, Sort
 
-Pagination implemented for large product lists.
+Pagination implemented for large product lists
 
 Product Detail Page (/product/[id])
 
-Server component fetches product details.
+Server component fetches product details
 
-Related products section is a client component for interactivity (filter/search/pagination).
+Related products section is a client component for interactivity (filter/search/pagination)
 
 Components
 
-Client Components (interactive, use hooks)
+Client Components (interactive, use hooks):
 
-FilterPanel → handles category & price filter.
+FilterPanel → category & price filtering
 
-SearchInput → search by title.
+SearchInput → search by product title
 
-SortSelect → sort by price.
+SortSelect → sort products by price
 
-RelatedProductsClient → shows related products with pagination/filtering.
+RelatedProductsClient → shows related products with pagination & filtering
 
-Server Components (data fetching, static render)
+Server Components (data fetching, static render):
 
-ProductDetail page → fetches product by ID.
+ProductDetail page → fetches product by ID
 
-API fetch functions (getProduct, getRelatedProducts) live here.
+API fetch functions (getProduct, getRelatedProducts)
 
 State & Data Flow
 
-State is lifted from interactive components to their parent (HomeClient or RelatedProductsClient) for synchronized filtering and pagination.
+State is lifted from interactive components to their parent (HomeClient or RelatedProductsClient) for synchronized filtering and pagination
 
-Server fetch functions provide initial product data (initialProducts).
+Server fetch functions provide initial product data (initialProducts)
 
-Pagination, filtering, and sorting are handled entirely on the client side.
+Pagination, filtering, and sorting are handled entirely on the client side
 
 3. Trade-offs / Known Issues
 
 Trade-offs
 
-Related products section uses client-side filtering to allow instant updates, at the cost of initial bundle size.
+Related products section uses client-side filtering for instant updates → increases initial bundle size
 
-Product detail page fetches products on the server for SEO and performance but interactive filtering is client-side.
+Product detail page fetches products on the server for SEO and performance, while interactive filtering is client-side
 
 Known Issues
 
-Server component cannot handle client-side state, so any useState in ProductDetail will throw errors.
+Server component cannot handle useState, so adding hooks in ProductDetail will throw errors
 
-Pagination and filtering on RelatedProductsClient may reset when parent re-renders.
+Pagination and filtering on RelatedProductsClient may reset when parent re-renders
 
-API is mocked via dummyjson.com → real production API may require authentication or different endpoints.
+API is mocked via dummyjson.com → real production API may require authentication or different endpoints
 
-4. Optional Demo
+4. Demo (Optional)
 
-A short Loom or GIF can show:
+A short demo can show:
 
-Filtering products by category/price.
+Filtering products by category/price
 
-Searching products.
+Searching products by title
 
-Pagination with Previous/Next buttons.
+Pagination with Previous/Next buttons
 
-Clicking a product and viewing related products.
+Clicking a product to view related products
 
-## Demo
-
-[![Watch the demo](## Demo
-
-[![Watch the demo](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)])]
+Demo Video / GIF
+[![Watch the demo](https://youtu.be/5sercvTYOcg)]
