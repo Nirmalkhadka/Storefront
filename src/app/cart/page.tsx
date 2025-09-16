@@ -5,7 +5,7 @@ import Link from "next/link";
 import { toast } from "react-hot-toast";
 
 export default function Cart() {
-  const { items, removeItem, updateQuantity, clearCart } = useCartStore();
+  const { items, clearCart } = useCartStore();
 
   const total = items
     .reduce((sum, item) => sum + item.price * item.quantity, 0)

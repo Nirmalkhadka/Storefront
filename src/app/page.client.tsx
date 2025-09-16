@@ -8,20 +8,42 @@ import SortSelect from "@/components/SortSelect";
 import SkeletonLoader from "@/components/SkeletonLoader";
 import { Suspense } from "react";
 
+// Fetch products at build time (SSG)
+export async function getProducts(): Promise<Product[]> {
+  try {
+    const res = await fetch("https://dummyjson.com/products?limit=100", {
+      cache: "force-cache", // fetch once at build time
+    });
+    if (!res.ok) throw new Error("Failed to fetch products");
+    const data = await res.json();
+    return data.products.map((item: any) => ({
+      id: item.id,
+      title: item.title,
+      price: item.price,
+      category: item.category,
+      description: item.description || "No description available",
+      image: item.thumbnail || item.images?.[0] || "/placeholder.jpg",
+      rating: { rate: item.rating, count: item.stock },
+      stock: item.stock,
+    }));
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return [];
+  }
+}
+
 interface HomeClientProps {
   initialProducts: Product[];
 }
 
 export default function HomeClient({ initialProducts }: HomeClientProps) {
-  const [allProducts, setAllProducts] = useState<Product[]>(initialProducts);
   const [filteredProducts, setFilteredProducts] =
     useState<Product[]>(initialProducts);
-  const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const productsPerPage = 8;
 
-  const memoizedProducts = useMemo(() => allProducts, [allProducts]);
+  const memoizedProducts = useMemo(() => initialProducts, [initialProducts]);
 
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
   const paginatedProducts = filteredProducts.slice(
@@ -29,13 +51,12 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
     currentPage * productsPerPage
   );
 
-  console.log("Paginated Products:", paginatedProducts);
-
   return (
     <div className="container mx-auto p-6 sm:p-8 lg:p-10 bg-white dark:bg-gray-900 min-h-screen">
       <h1 className="text-4xl font-bold mb-8 text-gray-800 dark:text-gray-100">
         Storefront
       </h1>
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 space-y-4 sm:space-y-0">
         <div className="w-full sm:w-1/3">
           <SearchInput
@@ -64,6 +85,7 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
           </button>
         </div>
       </div>
+
       <div className="flex flex-col lg:flex-row gap-8">
         {showFilters && (
           <div className="lg:w-1/4 mb-6 lg:mb-0">
@@ -75,9 +97,7 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
         )}
         <div className="lg:w-3/4">
           <Suspense fallback={<SkeletonLoader />}>
-            {isLoading ? (
-              <SkeletonLoader />
-            ) : paginatedProducts.length === 0 ? (
+            {paginatedProducts.length === 0 ? (
               <section
                 aria-live="polite"
                 className="text-center text-gray-500 dark:text-gray-400 py-8"
@@ -88,27 +108,19 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
               </section>
             ) : (
               <>
-                <div
-                  className="
-    grid gap-8
-    grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4
-    px-6 md:px-12 py-10
-  "
-                >
-                  {paginatedProducts
-                    .filter((p): p is Product => !!p && p.id !== undefined)
-                    .map((product, index) => (
-                      <ProductCard
-                        key={product.id}
-                        product={product}
-                        priority={index < 4}
-                        className="animate-fadeIn"
-                      />
-                    ))}
+                <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 px-6 md:px-12 py-10">
+                  {paginatedProducts.map((product, index) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      priority={index < 4}
+                      className="animate-fadeIn"
+                    />
+                  ))}
                 </div>
 
                 <div className="mt-12 flex justify-center space-x-8">
-                  {!isLoading && currentPage > 1 && (
+                  {currentPage > 1 && (
                     <button
                       onClick={() =>
                         setCurrentPage((prev) => Math.max(prev - 1, 1))
@@ -122,10 +134,12 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
                   <span className="px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-lg">
                     Page {currentPage} of {totalPages}
                   </span>
-                  {!isLoading && currentPage < totalPages && (
+                  {currentPage < totalPages && (
                     <button
                       onClick={() =>
-                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                        setCurrentPage((prev) =>
+                          Math.min(prev + 1, totalPages)
+                        )
                       }
                       className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 transform hover:scale-105"
                       aria-label="Next page"

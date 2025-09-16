@@ -47,10 +47,23 @@ async function getRelatedProducts(
       "skip ID:",
       currentId
     );
+    return data.products;
+    interface APIProduct {
+      id: number;
+      title: string;
+      price: number;
+      category: string;
+      description?: string;
+      thumbnail?: string;
+      images?: string[];
+      rating: number;
+      stock: number;
+    }
+
     return data.products
-      .filter((item: any) => item.id !== currentId)
+      .filter((item: APIProduct) => item.id !== currentId)
       .slice(0, 4)
-      .map((item: any) => ({
+      .map((item: APIProduct) => ({
         id: item.id,
         title: item.title,
         price: item.price,

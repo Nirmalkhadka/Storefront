@@ -1,18 +1,21 @@
-'use client';
-import { Product } from '@/lib/types';
+"use client";
+import { Product } from "@/lib/types";
 
 interface SortSelectProps {
   products: Product[];
   setFilteredProducts: (products: Product[]) => void;
 }
 
-export default function SortSelect({ products, setFilteredProducts }: SortSelectProps) {
+export default function SortSelect({
+  products,
+  setFilteredProducts,
+}: SortSelectProps) {
   const handleSort = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const sortType = e.target.value;
-    let sorted = [...products];
-    if (sortType === 'price-asc') {
+    const sorted = [...products];
+    if (sortType === "price-asc") {
       sorted.sort((a, b) => a.price - b.price);
-    } else if (sortType === 'price-desc') {
+    } else if (sortType === "price-desc") {
       sorted.sort((a, b) => b.price - a.price);
     }
     setFilteredProducts(sorted);
@@ -20,7 +23,10 @@ export default function SortSelect({ products, setFilteredProducts }: SortSelect
 
   return (
     <div className="mb-4">
-      <label htmlFor="sort" className="mr-2 font-semibold text-gray-700 dark:text-gray-300">
+      <label
+        htmlFor="sort"
+        className="mr-2 font-semibold text-gray-700 dark:text-gray-300"
+      >
         Sort by:
       </label>
       <select
