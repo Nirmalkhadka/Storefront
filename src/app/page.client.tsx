@@ -16,16 +16,28 @@ export async function getProducts(): Promise<Product[]> {
     });
     if (!res.ok) throw new Error("Failed to fetch products");
     const data = await res.json();
-    return data.products.map((item: any) => ({
-      id: item.id,
-      title: item.title,
-      price: item.price,
-      category: item.category,
-      description: item.description || "No description available",
-      image: item.thumbnail || item.images?.[0] || "/placeholder.jpg",
-      rating: { rate: item.rating, count: item.stock },
-      stock: item.stock,
-    }));
+    return data.products.map(
+      (item: {
+        id: number;
+        title: string;
+        price: number;
+        category: string;
+        description?: string;
+        thumbnail?: string;
+        images?: string[];
+        rating?: number;
+        stock: number;
+      }): Product => ({
+        id: item.id,
+        title: item.title,
+        price: item.price,
+        category: item.category,
+        description: item.description || "No description available",
+        image: item.thumbnail || item.images?.[0] || "/placeholder.jpg",
+        rating: { rate: item.rating ?? 0, count: item.stock },
+        stock: item.stock,
+      })
+    );
   } catch (error) {
     console.error("Error fetching products:", error);
     return [];
@@ -137,9 +149,7 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
                   {currentPage < totalPages && (
                     <button
                       onClick={() =>
-                        setCurrentPage((prev) =>
-                          Math.min(prev + 1, totalPages)
-                        )
+                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                       }
                       className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 transform hover:scale-105"
                       aria-label="Next page"
