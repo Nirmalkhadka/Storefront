@@ -13,28 +13,28 @@ export async function getProducts(): Promise<Product[]> {
     if (!data.products || !Array.isArray(data.products)) {
       throw new Error("Invalid API response: Expected an array of products");
     }
-    interface APIProduct {
-      id: number;
-      title: string;
-      price: number;
-      category: string;
-      description?: string;
-      thumbnail?: string;
-      images?: string[];
-      rating: number;
-      stock: number;
-    }
-
-    return data.products.map((item: APIProduct) => ({
-      id: item.id,
-      title: item.title,
-      price: item.price,
-      category: item.category,
-      description: item.description || "No description available",
-      image: item.thumbnail || item.images?.[0] || "/placeholder.jpg",
-      rating: { rate: item.rating, count: item.stock },
-      stock: item.stock,
-    }));
+    return data.products.map(
+      (item: {
+        id: number;
+        title: string;
+        price: number;
+        category: string;
+        description?: string;
+        thumbnail?: string;
+        images?: string[];
+        rating?: number;
+        stock: number;
+      }): Product => ({
+        id: item.id,
+        title: item.title,
+        price: item.price,
+        category: item.category,
+        description: item.description || "No description available",
+        image: item.thumbnail || item.images?.[0] || "/placeholder.jpg", // ensures a URL
+        rating: { rate: item.rating ?? 0, count: item.stock },
+        stock: item.stock,
+      })
+    );
   } catch (error) {
     console.error("Error fetching products:", error);
     return mockProducts;

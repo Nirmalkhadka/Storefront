@@ -34,7 +34,7 @@ export default function SearchInput({
   }, [searchTerm, products, handleSearch]);
 
   return (
-    <div className="w-full max-w-xl mx-auto mb-8">
+    <div className="w-full max-w-xl mx-auto mb-24">
   <input
     id="search"
     type="text"
@@ -42,7 +42,7 @@ export default function SearchInput({
     value={searchTerm}
     onChange={(e) => setSearchTerm(e.target.value)}
     className="
-      w-full border border-gray-300 dark:border-gray-600
+      w-auto border border-gray-300 dark:border-gray-600
       rounded-full px-5 py-3 shadow-sm
       focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
       bg-gray-50 dark:bg-gray-700

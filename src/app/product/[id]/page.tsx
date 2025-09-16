@@ -39,37 +39,23 @@ async function getRelatedProducts(
     if (!res.ok) return [];
     const data = await res.json();
     if (!data.products || !Array.isArray(data.products)) return [];
-    console.log(
-      "Fetched related:",
-      data.products.length,
-      "category:",
-      category,
-      "skip ID:",
-      currentId
-    );
-    return data.products;
-    interface APIProduct {
-      id: number;
-      title: string;
-      price: number;
-      category: string;
-      description?: string;
-      thumbnail?: string;
-      images?: string[];
-      rating: number;
-      stock: number;
-    }
 
     return data.products
-      .filter((item: APIProduct) => item.id !== currentId)
+      .filter((item: any) => item.id !== currentId)
       .slice(0, 4)
-      .map((item: APIProduct) => ({
+      .map((item: any) => ({
         id: item.id,
         title: item.title,
         price: item.price,
         category: item.category,
         description: item.description || "No description available",
-        image: item.thumbnail || item.images?.[0] || "/placeholder.jpg",
+        // Ensure image is never empty
+        image:
+          item.thumbnail?.trim() !== ""
+            ? item.thumbnail
+            : item.images?.[0]?.trim() !== ""
+            ? item.images[0]
+            : "/placeholder.jpg",
         rating: { rate: item.rating, count: item.stock },
         stock: item.stock,
       }));
@@ -108,10 +94,11 @@ export default async function ProductDetail({
   );
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 lg:p-8 bg-white dark:bg-gray-900 min-h-screen">
+    <div className="container mx-auto p-4 sm:p-6 lg:p-8 min-h-screen">
       <section className="max-w-6xl mx-auto animate-slideIn">
         <div className="flex flex-col md:flex-row gap-8">
-          <div className="md:w-1/2">
+          <div style={{padding:'12px'}}
+           className="md:w-1/2">
             <Image
               src={product.image}
               alt={product.title}
@@ -121,7 +108,8 @@ export default async function ProductDetail({
               priority
             />
           </div>
-          <div className="md:w-1/2 sticky top-6 bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+          <div style={{padding:'10px'}}
+           className="md:w-full h-fit sticky top-6 bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
             <h1 className="text-4xl font-extrabold mb-3 text-gray-900 dark:text-white">
               {product.title}
             </h1>
